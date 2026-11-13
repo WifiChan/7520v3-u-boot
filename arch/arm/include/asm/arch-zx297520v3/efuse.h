@@ -1,0 +1,65 @@
+/*******************************************************************************
+ * Copyright (C) 2016, ZIXC Corporation.
+ *
+ * File Name:    
+ * File Mark:    
+ * Description:  
+ * Others:        
+ * Version:       v1.0
+ * Author:        zhouqi
+ * Date:          2013-4-2
+ * History 1:      
+ *     Date: 
+ *     Version:
+ *     Author: 
+ *     Modification:  
+ * History 2: 
+  ********************************************************************************/
+#ifndef __EFUSE_H__
+#define __EFUSE_H__
+
+#define CHIP_DDR_IS_32M			0
+#define CHIP_DDR_IS_64M			1
+#define CHIP_DDR_IS_128M		2
+#define CHIP_DDR_IS_256M		3
+#define CHIP_DDR_IS_512M		4
+
+
+#define ZX297520V3_GW_NYB_1G_DDR			0xF86302
+#define ZX297520V3_GW_NYC_1G_DDR			0xF86303
+#define ZX297520V3ECO_GW_UNILC_512M_DDR		0xF86304
+#define ZX297520V3ECO_GW_APM_512M_DDR		0xF86305
+#define ZX297520V3ECO_GW_NYB_1G_DDR			0xF86306
+#define ZX297520V3ECO_GW_NYC_1G_DDR			0xF86307
+#define ZX297520V3ECO_GW_WINBD_256M_DDR	0xF86308
+#define ZX297520V3ECO_GW_UNILC_256M_DDR		0xF86309
+#define ZX297520V3ECO_GW_APM_256M_DDR		0xF8630a
+#define ZX297520V3ECO_GW_ESMT_512M_DDR		0xF8630b
+#define ZX297520V3SC_GW_NYC_1G_DDR			0xF8630c
+#define ZX297520V3ECOSCC_GW_UNILC_1G_DDR	0xF8630d
+#define ZX297520V3ECOSCC_GW_NYC_1G_DDR		0xF8630e
+#define ZX297520V3ECOSC_GW_NYC_1G_DDR		0xF8630f
+#define ZX297520V3ECOSC_GW_UNILC_1G_DDR		0xF86310
+#define ZX297520V3ECOSC_GW_NYC_2G_DDR		0xF86311
+#define ZX297520V3ECOSCC_GW_NYB_4G_DDR		0xF86313
+#define ZX297520V3ECOGG_GW_NYC_2G_DDR		0xF86314
+#define ZX297520V3ECOGG_GW_NYB_4G_DDR		0xF86315
+#define ZX297520V3ECOGG_GW_NYC_NOR_2G_DDR	0xF86316
+#define ZX297520V3ECOSC_GW_NYC_NOR_2G_DDR	0xF86317
+
+#define ZX297520V3_ZW_NYB_1G_DDR			0x1E871E
+#define ZX297520V3_ZW_NYC_1G_DDR			0x1E871F
+#define ZX297520V3ECO_ZW_UNILC_512M_DDR		0x1E8720
+#define ZX297520V3ECO_ZW_APM_512M_DDR		0x1E8721
+#define ZX297520V3ECO_ZW_NYB_1G_DDR			0x1E8722
+#define ZX297520V3ECO_ZW_NYC_1G_DDR			0x1E8723
+#define ZX297520V3ECO_ZW_WINBD_256M_DDR	0x1E8724
+#define ZX297520V3ECO_ZW_UNILC_256M_DDR		0x1E8725
+#define ZX297520V3ECO_ZW_APM_256M_DDR		0x1E8726
+#define ZX297520V3ECO_ZW_ESMT_512M_DDR		0x1E8727
+
+#define ZX297520V3ECO_AZW_UNILC_512M_DDR	0x1F9801
+
+void efuse_get_data(void);
+
+#endif /*__EFUSE_H__*/

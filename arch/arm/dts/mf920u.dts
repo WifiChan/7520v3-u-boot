@@ -1,0 +1,5 @@
+#include "zx297520v3.dtsi"
+
+&matrixclk {
+	compatible = "sanechips,zx297520v3-matrix-clk";
+};

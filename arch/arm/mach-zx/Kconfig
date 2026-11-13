@@ -1,0 +1,32 @@
+if ARCH_ZX
+
+config SYS_SOC
+	default "zx297520v3"
+
+config SYS_VENDOR
+	default "zx"
+
+choice
+	prompt "Sanechip board select"
+
+config TARGET_ZX297520V3
+	bool "Sanechip ZX297520V3 SoC"
+	select CPU_V7A
+	help
+	  Support for Sanechip ZX297520V3 SoC (Cortex-A53 running in 32-bit AArch32 mode).
+
+endchoice
+
+config SYS_BOARD
+	string "Board name"
+	default "zx297520v3" if TARGET_ZX297520V3
+	default ""
+	help
+	  This option contains information about board name.
+	  Based on this option board/<CONFIG_SYS_VENDOR>/<CONFIG_SYS_BOARD> will
+	  be used.
+
+config SYS_CONFIG_NAME
+	default "zx297520v3" if TARGET_ZX297520V3
+
+endif

@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-2.0
+
+menuconfig FAILSAFE
+	bool "ZX297520V3 Web Failsafe Recovery"
+	select MTK_TCP
+	select MTK_HTTPD
+	select MD5
+	default y
+	help
+	  Enable the Web-based recovery UI on port 80 to flash firmware, MTD partitions,
+	  bootloaders and full flash images for Sanechip ZX297520V3.

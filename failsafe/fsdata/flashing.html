@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在刷写闪存 - ZX297520V3</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/main.js"></script>
+    <script>
+        function fmtMB(bytes) {
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function initFlashing() {
+            var bar = document.getElementById('progress_fill');
+            var pctTxt = document.getElementById('progress_pct');
+            var detail = document.getElementById('progress_detail');
+            var stepText = document.getElementById('progress_step');
+            var prevWritten = 0;
+            /*
+             * Two passes over the whole image: erase everything first, then
+             * program it.  The bar maps the erase pass to 0-50% and the write
+             * pass to 50-100%, so the operator sees both stages distinctly.
+             */
+            var phase = 'erase';
+            var retryCount = 0;
+            var MAX_RETRIES = 5;
+
+            function showSuccess() {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('progress_wrap').style.display = 'none';
+                document.getElementById('status_icon').innerHTML = '&#10004;';
+                document.getElementById('status_icon').style.display = 'block';
+                document.getElementById('title').innerHTML = '固件刷写成功！';
+                document.getElementById('desc').innerHTML = '闪存擦写与回读校验已顺利完成！<br><strong style="color:#16a34a; font-size:15px;">✔ 请断电重启。</strong>';
+
+                document.getElementById('countdown').innerHTML = '如需再次进入恢复模式，可重新上电并访问管理页面。';
+            }
+
+            function step() {
+                ajax({
+                    url: '/flash_step?mode=' + phase + '&offset=' + prevWritten,
+                    done: function(response) {
+                        var res = null;
+                        try { res = JSON.parse(response); } catch (e) {}
+                        if (!res || res.status !== 'ok') {
+                            location = '/fail.html';
+                            return;
+                        }
+
+                        retryCount = 0;
+                        var total = res.total || 0;
+                        var written = res.written || 0;
+                        /* half of the bar per pass: erase 0-50%, write 50-100% */
+                        var half = total ? Math.round(written * 50 / total) : 50;
+                        var pct = (phase === 'erase') ? half : 50 + half;
+                        var seg = written - prevWritten;
+
+                        bar.style.width = pct + '%';
+                        pctTxt.innerHTML = pct + '%';
+                        detail.innerHTML = (phase === 'erase' ? '总擦除 ' : '写入并校验 ') +
+                                           fmtMB(written) + ' / ' + fmtMB(total);
+                        stepText.innerHTML = (phase === 'erase' ? '总擦除 ' : '写入并回读校验 ') +
+                                             fmtMB(seg) + '，本片用时 ' +
+                                             (phase === 'erase' ? res.erase_ms : res.write_ms) + ' ms';
+                        prevWritten = written;
+
+                        if (res.done) {
+                            if (phase === 'erase') {
+                                phase = 'write';
+                                prevWritten = 0;
+                                stepText.innerHTML = '总擦除完成，开始写入并回读校验数据...';
+                                step();
+                            } else {
+                                showSuccess();
+                            }
+                        } else {
+                            step();
+                        }
+                    },
+                    fail: function() {
+                        if (retryCount < MAX_RETRIES) {
+                            retryCount++;
+                            stepText.innerHTML = '连接保活重连中 (' + retryCount + '/' + MAX_RETRIES + ')，继续当前进度...';
+                            setTimeout(step, 1000);
+                            return;
+                        }
+                        location = '/fail.html';
+                    },
+                    timeout: 300000
+                });
+            }
+
+            stepText.innerHTML = '正在总擦除全部闪存 (连接保活中)，请耐心等待...';
+            step();
+        }
+    </script>
+</head>
+<body onload="initFlashing()">
+    <div class="container small-container">
+        <div class="card status-card">
+            <div id="spinner" class="spinner"></div>
+            <div id="status_icon" class="success-icon" style="display: none;"></div>
+            <h2 id="title">正在刷写闪存...</h2>
+            <p id="desc">文件已成功上传，U-Boot 正在执行闪存扇区擦除与固件写入，请耐心等待。<br><strong class="danger-txt">&#9888; 严禁拔出设备或切断电源！</strong></p>
+            <div id="progress_wrap" class="progress-wrap">
+                <div class="progress-header">
+                    <span id="progress_detail">0.00 MB / 0.00 MB</span>
+                    <span id="progress_pct">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress_fill" class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <div id="progress_step" class="countdown-txt"></div>
+            </div>
+            <div id="countdown" class="countdown-txt"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZX297520V3 Web Recovery</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/main.js"></script>
+</head>
+<body onload="startup()">
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="icon">&#9881;</span>
+                <div class="title-group">
+                    <h1>ZX297520V3 固件恢复平台</h1>
+                    <p class="subtitle">Sanechip ZX297520V3 Web Failsafe U-Boot</p>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <div class="badge" id="uboot_badge">U-Boot</div>
+            </div>
+        </header>
+
+        <section class="card info-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">主控芯片:</span>
+                    <span class="val">Sanechip ZX297520V3 (Cortex-A53, 32-bit)</span>
+                </div>
+                <div class="info-item" style="grid-column: span 2;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                        <div>
+                            <span class="label">存储介质:</span>
+                            <span class="val highlight" id="flash_info">检测中...</span>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-sm" onclick="switchFlashProfile(128)" style="font-size:11px; padding:3px 8px; background:#059669; color:#fff; border:none; border-radius:4px; cursor:pointer;" title="如果设备实际为 128MB SPI NAND 闪存可一键切换">⚡ 设为 128M NAND</button>
+                            <button type="button" class="btn btn-sm" onclick="switchFlashProfile(64)" style="font-size:11px; padding:3px 8px; background:#0d9488; color:#fff; border:none; border-radius:4px; cursor:pointer;" title="如果设备实际为 64MB SPI NAND 闪存可一键切换">⚡ 设为 64M NAND</button>
+                            <button type="button" class="btn btn-sm" onclick="switchFlashProfile(16)" style="font-size:11px; padding:3px 8px; background:#2563eb; color:#fff; border:none; border-radius:4px; cursor:pointer;" title="如果设备实际为 16MB NOR 闪存可一键切换">⚡ 强制设为 16MB</button>
+                            <button type="button" class="btn btn-sm" onclick="switchFlashProfile(8)" style="font-size:11px; padding:3px 8px; background:#4b5563; color:#fff; border:none; border-radius:4px; cursor:pointer;" title="如果设备实际为 8MB NOR 闪存可一键切换">⚡ 强制设为 8MB</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="label">IP / DHCP 服务:</span>
+                    <span class="val">192.168.72.1 (免设IP)</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">运行状态:</span>
+                    <span class="val status-ok">HTTP Web Failsafe</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 导航选项卡 -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('flash')">固件刷写</button>
+            <button class="tab-btn" onclick="switchTab('backup')">固件/分区备份</button>
+            <button class="tab-btn" onclick="switchTab('partitions')">闪存分区表</button>
+            <button class="tab-btn" onclick="switchTab('bootargs')">启动参数 (Bootargs)</button>
+        </nav>
+
+        <!-- TAB 1: 固件刷写 -->
+        <section id="tab_flash" class="card main-card tab-content active">
+            <h2>选择刷写类型</h2>
+            <div class="type-selector">
+                <label class="radio-card selected">
+                    <input type="radio" name="flash_type" value="rootfs" checked onchange="selectType('rootfs')">
+                    <div class="radio-content">
+                        <strong>🐧 rootfs (根文件系统)</strong>
+                        <span>刷写 Linux 根文件系统分区 (最常用)</span>
+                    </div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" name="flash_type" value="imagefs" onchange="selectType('imagefs')">
+                    <div class="radio-content">
+                        <strong>📦 imagefs (系统内核/固件)</strong>
+                        <span>刷写 Linux 内核与系统镜像</span>
+                    </div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" name="flash_type" value="uboot" onchange="selectType('uboot')">
+                    <div class="radio-content">
+                        <strong>⚡ uboot (U-Boot 引导)</strong>
+                        <span>刷写 U-Boot (自动同步备份镜像)</span>
+                    </div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" name="flash_type" value="nvrofs" onchange="selectType('nvrofs')">
+                    <div class="radio-content">
+                        <strong>⚙️ nvrofs (出厂无线校准)</strong>
+                        <span>刷写射频与出厂校准参数</span>
+                    </div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" name="flash_type" value="userdata" onchange="selectType('userdata')">
+                    <div class="radio-content">
+                        <strong>📁 userdata (用户数据)</strong>
+                        <span>刷写用户持久化配置分区</span>
+                    </div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" name="flash_type" value="full" onchange="selectType('full')">
+                    <div class="radio-content">
+                        <strong>💾 full (全盘编程器固件)</strong>
+                        <span>从 0x0 完整覆盖全盘 (8M/16M/64M/128M)</span>
+                    </div>
+                </label>
+                <label class="radio-card">
+                    <input type="radio" name="flash_type" value="custom" onchange="selectType('custom')">
+                    <div class="radio-content">
+                        <strong>🔧 任意分区 / 自定义偏移</strong>
+                        <span>从检测到的分区列表选取或指定十六进制偏移</span>
+                    </div>
+                </label>
+            </div>
+
+            <div id="custom_input_wrap" style="display:none; margin: 15px 0;">
+                <label for="custom_target">选择或输入目标分区名 / 十六进制起始偏移:</label>
+                <div style="display:flex; gap: 8px; margin-top: 6px;">
+                    <select id="part_dropdown" class="input-text" style="max-width: 220px;" onchange="onSelectPartDropdown(this)">
+                        <option value="">-- 选择已识别分区 --</option>
+                    </select>
+                    <input type="text" id="custom_target" class="input-text" placeholder="例如: rootfs 或 0x00468000" value="rootfs">
+                </div>
+            </div>
+
+            <form id="form" class="upload-form">
+                <div class="file-drop-area" onclick="document.getElementById('file').click()">
+                    <span class="file-icon">&#128194;</span>
+                    <span class="file-msg" id="file_label">点击选择固件文件 或 拖放文件至此处</span>
+                    <input id="file" type="file" onchange="fileSelected(this)">
+                </div>
+                <div class="action-wrap">
+                    <button type="button" class="btn btn-primary" id="btn_upload" onclick="startUpload()">上传文件</button>
+                </div>
+            </form>
+
+            <div id="upload_progress_wrap" class="progress-wrap" style="display: none;">
+                <div class="progress-header">
+                    <span id="upload_stage_title">上传进度</span>
+                    <span id="percent_txt">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="bar" class="progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div id="verify_card" class="verify-card" style="display: none;">
+                <h3>固件校验信息</h3>
+                <div class="verify-grid">
+                    <div class="v-row"><span>文件大小:</span><strong id="v_size">-</strong></div>
+                    <div class="v-row"><span>MD5 校验:</span><code id="v_md5">-</code></div>
+                    <div class="v-row"><span>刷写目标:</span><strong id="v_target">-</strong></div>
+                </div>
+                <div class="confirm-wrap">
+                    <p class="warn-tip">&#9888; 确认校验和无误后，点击“开始刷写”。刷写过程请勿切断电源！</p>
+                    <button class="btn btn-danger" onclick="location = '/flashing.html'">确认刷写固件</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: 分区备份 -->
+        <section id="tab_backup" class="card main-card tab-content">
+            <h2>闪存及分区备份导出</h2>
+            <p class="tip-desc">直接从 Flash 闪存读取原始数据并通过浏览器下载到本地电脑，便于救砖或保留原始工厂参数。</p>
+            
+            <div class="backup-block">
+                <h3>完整闪存镜像备份 (Full Flash Dump)</h3>
+                <p class="sub-desc">备份包含 Bootloader、分区表、系统及出厂无线校准参数的完整镜像 (支持 8M/16M NOR 及 64M/128M NAND)。</p>
+                <button class="btn btn-primary" onclick="downloadBackup('full')">💾 备份全分区镜像 (Full Flash)</button>
+            </div>
+
+            <div class="backup-block" style="margin-top: 24px;">
+                <h3>独立关键分区备份</h3>
+                <div class="quick-btn-grid">
+                    <button class="btn btn-secondary" onclick="downloadBackup('rootfs')">备份 根文件系统 (rootfs)</button>
+                    <button class="btn btn-secondary" onclick="downloadBackup('imagefs')">备份 系统内核 (imagefs)</button>
+                    <button class="btn btn-secondary" onclick="downloadBackup('uboot')">备份 U-Boot 引导 (uboot)</button>
+                    <button class="btn btn-secondary" onclick="downloadBackup('nvrofs')">备份 NV 射频参数 (nvrofs)</button>
+                    <button class="btn btn-secondary" onclick="downloadBackup('userdata')">备份 用户数据 (userdata)</button>
+                    <button class="btn btn-secondary" onclick="downloadBackup('zloader')">备份 1阶引导 (zloader)</button>
+                </div>
+            </div>
+
+            <div class="backup-block" style="margin-top: 24px;">
+                <h3>自定义分区导出</h3>
+                <div class="custom-backup-row">
+                    <input type="text" id="custom_backup_name" class="input-text" placeholder="输入分区名称 (如 rootfs, nvrofs, imagefs)">
+                    <button class="btn btn-primary" onclick="downloadCustomBackup()">下载指定分区</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: 分区表 -->
+        <section id="tab_partitions" class="card main-card tab-content">
+            <div class="section-header">
+                <h2>Flash 分区布局与自动识别</h2>
+                <button class="btn btn-sm btn-secondary" onclick="loadPartitions()">刷新列表</button>
+            </div>
+            <div id="ptable_status" class="alert alert-info">正在探测分区表...</div>
+            <div class="table-wrap">
+                <table class="part-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>分区名称</th>
+                            <th>起始偏移 (Offset)</th>
+                            <th>大小</th>
+                            <th>分区操作 (刷入 / 备份)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partition_tbody">
+                        <tr><td colspan="5" style="text-align: center; color: #94a3b8;">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 4: 启动参数 (Bootargs) -->
+        <section id="tab_bootargs" class="card main-card tab-content">
+            <h2>内核启动参数配置 (Kernel Bootargs)</h2>
+            <p class="tip-desc">查看与修改 U-Boot 传递给 Linux 内核的 <code>bootargs</code> 命令行参数。修改后将自动保存至 Flash 环境变量中。</p>
+            
+            <div class="form-group">
+                <label for="bootargs_input">当前 bootargs 参数：</label>
+                <textarea id="bootargs_input" class="code-textarea" rows="4" placeholder="正在读取环境变量..."></textarea>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>快速预设方案：</label>
+                <div class="preset-btn-group">
+                    <button class="btn btn-sm btn-secondary" onclick="applyPreset('openwrt')">OpenWrt 推荐 (mtdblock4)</button>
+                    <button class="btn btn-sm btn-secondary" onclick="applyPreset('mf761w')">MF761W 原厂 (mtdblock4)</button>
+                    <button class="btn btn-sm btn-secondary" onclick="applyPreset('am206')">AM206 原厂 (mtdblock5)</button>
+                    <button class="btn btn-sm btn-secondary" onclick="applyPreset('debug')">调试模式 (Debug)</button>
+                </div>
+            </div>
+
+            <div class="action-wrap" style="margin-top: 20px;">
+                <button class="btn btn-primary" id="btn_save_bootargs" onclick="saveBootargs()">保存启动参数</button>
+                <span id="bootargs_status" class="status-msg"></span>
+            </div>
+        </section>
+
+        <footer>
+            <div id="version">U-Boot Web Failsafe</div>
+        </footer>
+    </div>
+</body>
+</html>
