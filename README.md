@@ -131,7 +131,7 @@ python3 package.py --uboot ../u-boot.bin --header-from /path/to/stock_2.uboot
 
 [hanwckf/bl-mt798x: ATF and u-boot for mt798x.](https://github.com/hanwckf/bl-mt798x)
 
-[Yuzhii0718/bl-mt798x-dhcpd at pr-sync-old-board-2025](https://github.com/Yuzhii0718/bl-mt798x-dhcpd/tree/pr-sync-old-board-2025?tab=readme-ov-file)
+[Yuzhii0718/bl-mt798x-dhcpd: A variant of hanwckf's u-boot by yuzhii, with support for dhcpd, and advance web ui, support i18n, more functions please see README.](https://github.com/Yuzhii0718/bl-mt798x-dhcpd)
 
 感谢Google Antigravity提供的Gemini 3.8 Flash与Gemini 4 Argon帮我实现了这个离谱的创意。
 
